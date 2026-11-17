@@ -1,0 +1,31 @@
+name: X keyword search export
+on:
+  workflow_dispatch:
+    inputs:
+      query:
+        description: X search keyword
+        required: true
+        default: NVIDIA
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install xscrape
+        run: python -m pip install -e .
+      - name: Search X or explain missing authentication
+        env:
+          X_COOKIES: ${{ secrets.X_COOKIES }}
+          SEARCH_QUERY: ${{ inputs.query }}
+        run: python scripts/export_keyword_csv.py
+      - name: Upload CSV
+        if: ${{ hashFiles('output/x_search.csv') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: x-search-csv
+          path: output/x_search.csv
+          retention-days: 1
