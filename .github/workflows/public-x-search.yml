@@ -1,0 +1,27 @@
+name: Public X search (no login)
+on:
+  workflow_dispatch:
+    inputs:
+      query:
+        description: 'Keyword to search in publicly indexed X posts'
+        required: true
+        default: 'NVIDIA'
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Search indexed X posts
+        env:
+          SEARCH_QUERY: ${{ inputs.query }}
+        run: python scripts/public_x_index_search.py
+      - name: Export CSV
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-x-search
+          path: output/public_x_index.csv
+          retention-days: 1
